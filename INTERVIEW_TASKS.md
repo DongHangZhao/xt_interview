@@ -1,4 +1,4 @@
-# XT 面试项目开发任务说明
+# 欣铁面试项目开发任务说明
 
 ## 一、项目简介
 
@@ -8,7 +8,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 后端 | Spring Boot 4.0.6, Java 21, JPA/Hibernate, Flyway, JWT |
+| 后端 | Spring Boot 4.0.6, Java 26, JPA/Hibernate, Flyway, JWT |
 | 前端 | Vue 3.4, Vite 5, TypeScript, Element Plus, Pinia |
 | 数据库 | MySQL 8.0 |
 | 构建 | Maven 3.6+, npm |
@@ -79,8 +79,8 @@ CREATE DATABASE IF NOT EXISTS xt_interview DEFAULT CHARACTER SET utf8mb4 COLLATE
    - 插入 2 条测试数据（如：研发部、运维部）
 
 2. **后端**：
-   - 参考用户管理管理，创建 `部门管理模块`所需的 实体类、接口、Service、实现、Controller。
-   - 实现一下接口
+   - 参考用户管理模块，创建 `部门管理模块`所需的 实体类、接口、Service、实现、Controller。
+   - 实现以下接口
 
    | 方法 | 路径 | 说明 |
    |------|------|------|
@@ -147,9 +147,24 @@ CREATE DATABASE IF NOT EXISTS xt_interview DEFAULT CHARACTER SET utf8mb4 COLLATE
 
 ### 1. 代码提交
 
-- 请将完成后的代码推送到指定的 Git 仓库
-- 提交信息请使用清晰的中文描述，例如：`新增部门管理模块`
-- 确保代码能正常编译和运行
+您可以选择以下任一方式提交：
+
+**方式一：Fork 仓库（推荐）**
+1. 访问 https://github.com/iamtcby5188/xt_interview ，点击右上角 **Fork** 将仓库复制到您自己的 GitHub 账号
+2. Fork 后请在 Settings 中将仓库设为 **Public**，方便我们查看
+3. 克隆您 fork 后的仓库到本地，完成任务后 commit 并 push
+4. 将您的仓库地址发给我们（如 `https://github.com/您的用户名/xt_interview`）
+
+**方式二：ZIP 包开发**
+1. 从以下地址下载项目 ZIP 包：https://github.com/iamtcby5188/xt_interview/archive/refs/heads/master.zip
+2. 解压后进行开发，完成后将代码打包为 ZIP 文件发给我们
+
+**开发环境下载**
+
+如果您需要开发环境，可以从以下链接下载（包含 JDK、Maven、Node.js 等）：
+
+- 链接: https://pan.baidu.com/s/1VRjdpA5fk89emDmuJpEZsA?pwd=a5p7
+- 提取码: a5p7
 
 ### 2. 验收标准
 
