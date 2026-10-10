@@ -24,24 +24,14 @@
 ## 二、开发环境搭建
 
 ### 1. 数据库准备
-
-```sql
-CREATE DATABASE IF NOT EXISTS xt_interview DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
+在您自己的环境中安装MySql数据库，新建xt_interview
 数据库连接信息（默认）：
 - 地址：`localhost:3306`
 - 用户名：`root`
 - 密码：`root`
 - 数据库名：`xt_interview`
 
-### 2. 后端启动
-后端运行在 `http://localhost:8080`，Flyway 会自动执行迁移脚本创建表结构。
-
-### 3. 前端启动
-前端运行在 `http://localhost:5173`，已配置代理将 `/api` 请求转发到后端 8080 端口。
-
-### 4. 默认账号
+### 2. 默认账号
 - 用户名：`admin`
 - 密码：`123456`
 
@@ -110,10 +100,7 @@ CREATE DATABASE IF NOT EXISTS xt_interview DEFAULT CHARACTER SET utf8mb4 COLLATE
    - 新建 Flyway 迁移脚本，给 `sys_account` 表新增 `department_id` 字段（BIGINT, 可空, 外键关联 `sys_department.id`）
 
 2. **后端**：
-   - 修改 `Account` 实体，新增 `departmentId` 字段
-   - 修改 `AccountDTO`，新增 `departmentId` 和 `departmentName` 字段
-   - 修改 `AccountServiceImpl`，在创建/更新用户时处理 `departmentId`
-   - 查询用户列表时，关联查询部门名称（可用 JPA 关联查询或手动关联）
+   - 修改 `Account` 模块相关代码，增加部门相关信息，确保Account的增删改查结构表结构一致。
 
 3. **前端**：
    - 用户管理页面的添加/编辑表单中新增"所属部门"下拉选择框
@@ -179,37 +166,3 @@ CREATE DATABASE IF NOT EXISTS xt_interview DEFAULT CHARACTER SET utf8mb4 COLLATE
 | 任务三（选做） | 搜索和分页功能正常 |
 
 ---
-
-## 五、其他要求
-
-### JWT 认证流程
-
-1. 用户调用 `/api/auth/login` 接口，提交用户名和密码
-2. 后端验证通过后，生成 JWT token 返回
-3. 前端将 token 存入 `localStorage`
-4. 后续请求通过 axios 拦截器在请求头添加 `Authorization: Bearer <token>`
-5. 后端 `JwtAuthenticationFilter` 验证 token 有效性
-
-### 认证相关
-
-除登录接口外，所有接口需在请求头中携带 JWT token：
-
-```
-Authorization: Bearer <your_token>
-```
-
-登录成功后，响应体中 `token` 字段即为 JWT token。
-
-
-### 前端路由守卫
-
-未登录用户访问需要认证的页面时，自动重定向到登录页。登录成功后跳转到目标页面。
-
-### 密码加密
-
-系统使用 MD5 加密存储密码（`MD5Util.encode` 方法）。创建用户时如果未传密码，默认使用 `123456`。
-
-### 软删除
-
-用户删除为软删除（`deleted` 字段标记），不会从数据库物理删除。查询时只返回 `deleted = 0` 的记录。
-
