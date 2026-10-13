@@ -16,6 +16,7 @@ target/
 node_modules/
 dist/
 *.local
+*.tsbuildinfo
 
 # OS
 .DS_Store
@@ -31,3 +32,6 @@ logs/
 
 # Uploads
 uploads/
+
+# 版本快照备份（不进仓库）
+_versions/

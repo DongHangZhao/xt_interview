@@ -9,9 +9,18 @@
         class="sidebar-menu"
         @select="handleMenuSelect"
       >
-        <el-menu-item index="/users">
+        <!-- 前端按权限隐藏菜单；后端接口仍有校验，前端隐藏仅为体验优化 -->
+        <el-menu-item v-if="userStore.isAdmin" index="/users">
           <el-icon><User /></el-icon>
           <span>用户管理</span>
+        </el-menu-item>
+        <el-menu-item v-if="userStore.isAdmin" index="/departments">
+          <el-icon><OfficeBuilding /></el-icon>
+          <span>部门管理</span>
+        </el-menu-item>
+        <el-menu-item v-else index="/profile">
+          <el-icon><Avatar /></el-icon>
+          <span>个人中心</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -22,6 +31,9 @@
           <span class="page-title">{{ pageTitle }}</span>
         </div>
         <div class="header-right">
+          <el-tag v-if="userStore.isAdmin" type="warning" size="small" effect="plain">
+            {{ roleText }}
+          </el-tag>
           <span class="user-info">欢迎，<strong>{{ userName }}</strong></span>
           <el-button type="danger" plain size="small" @click="handleLogout">
             退出登录
@@ -37,12 +49,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { authApi } from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User } from '@element-plus/icons-vue'
+import { User, OfficeBuilding, Avatar } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -59,10 +71,41 @@ const userName = computed(() => {
 
 const pageTitle = computed(() => {
   const titleMap: Record<string, string> = {
-    '/users': '用户管理'
+    '/users': '用户管理',
+    '/departments': '部门管理',
+    '/profile': '个人中心'
   }
   return titleMap[route.path] || '首页'
 })
+
+const roleText = computed(() => {
+  const map: Record<number, string> = {
+    1: '普通用户',
+    2: '管理员',
+    3: '超级管理员'
+  }
+  return map[userStore.roleLevel] || '未知角色'
+})
+
+// 普通用户无管理权限，若通过地址栏直接访问管理页则送回个人中心
+watch(
+  () => userStore.isAdmin,
+  (isAdmin) => {
+    if (!isAdmin && (route.path === '/users' || route.path === '/departments')) {
+      router.replace('/profile')
+    }
+  },
+  { immediate: true }
+)
+
+// 路由变化时同步侧边栏高亮，否则从用户管理切到部门管理后高亮不会跟随
+watch(
+  () => route.path,
+  (path) => {
+    activeMenu.value = path
+  },
+  { immediate: true }
+)
 
 function handleMenuSelect(index: string) {
   router.push(index)
@@ -73,7 +116,6 @@ onMounted(() => {
   if (!userStore.isLoggedIn) {
     router.push('/login')
   }
-  activeMenu.value = route.path
 })
 
 async function handleLogout() {

@@ -1,5 +1,9 @@
 package com.xt.interview.filter;
 
+import com.xt.interview.entity.Account;
+import com.xt.interview.repository.AccountRepository;
+import com.xt.interview.security.LoginUser;
+import com.xt.interview.security.UserContext;
 import com.xt.interview.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +22,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private static final Integer NOT_DELETED = 0;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -55,12 +64,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             request.setAttribute("username", username);
             request.setAttribute("roleLevel", roleLevel);
 
+            /**
+             * 🔴 权限不能只信 JWT 里的 claim。
+             * JWT 签发后到过期前，用户权限可能被管理员调整（或账号被软删除），
+             * 若直接用 token 里的旧 roleLevel 判权，改权限后旧 token 仍持有高权限。
+             * 因此每次请求都回库查一次实时权限，成本是一次主键查询，可接受。
+             */
+            Account account = accountRepository.findByIdAndDeleted(userId, NOT_DELETED)
+                    .orElse(null);
+            if (account == null) {
+                sendErrorResponse(response, 401, "账号不存在或已删除，请重新登录");
+                return;
+            }
+            if (account.getStatus() != null && account.getStatus() != 1) {
+                sendErrorResponse(response, 403, "账号已被禁用");
+                return;
+            }
+
+            UserContext.set(new LoginUser(userId, username,
+                    account.getRoleLevel(), account.getIsSuper()));
+
         } catch (Exception e) {
             sendErrorResponse(response, 401, "token无效，请重新登录");
             return;
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // 必须在请求结束时清理：Tomcat 线程池会复用线程，
+            // 不清理会导致下一个请求拿到上一个用户的权限（严重的越权风险）
+            UserContext.clear();
+        }
     }
 
     private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {

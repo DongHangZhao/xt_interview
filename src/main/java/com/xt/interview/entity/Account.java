@@ -35,6 +35,10 @@ public class Account {
     @Column(name = "is_super")
     private Integer isSuper;
 
+    /** 所属部门ID，对应 sys_department.id（任务二新增） */
+    @Column(name = "department_id")
+    private Long departmentId;
+
     @Column(name = "deleted")
     private Integer deleted;
 
@@ -85,6 +89,9 @@ public class Account {
 
     public Integer getIsSuper() { return isSuper; }
     public void setIsSuper(Integer isSuper) { this.isSuper = isSuper; }
+
+    public Long getDepartmentId() { return departmentId; }
+    public void setDepartmentId(Long departmentId) { this.departmentId = departmentId; }
 
     public Integer getDeleted() { return deleted; }
     public void setDeleted(Integer deleted) { this.deleted = deleted; }
